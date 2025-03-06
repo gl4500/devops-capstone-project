@@ -36,6 +36,7 @@ spec:
         value: $(params.branch)
       runAfter:
         - init
+
     - name: lint
       workspaces:
         - name: source
@@ -49,6 +50,7 @@ spec:
         value: ["--count","--max-complexity=10","--max-line-length=127","--statistics"]
       runAfter:
         - clone
+
     - name: test
       workspaces:
         - name: source
@@ -59,6 +61,20 @@ spec:
       - name: database_uri
         value: "sqlite:///test.db"
       - name: args
-        value: ["-v --with-spec --spec-color"]
+        value: "-v --with-spec --spec-color"
       runAfter:
         - clone
+
+    - name: build
+      workspaces:
+        - name: source
+          workspace: pipeline-workspace
+      taskRef:
+        name: buildah
+        kind: ClusterTask
+      params:
+      - name: IMAGE
+        value: "$(params.build-image)"
+      runAfter:
+        - tests
+        - lint
